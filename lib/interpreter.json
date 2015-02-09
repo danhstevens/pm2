@@ -3,5 +3,7 @@
   ".py": "python",
   ".rb": "ruby",
   ".php": "php",
-  ".pl" : "perl"
+  ".pl" : "perl",
+  ".js" : "node",
+  ".coffee" : "coffee"
 }

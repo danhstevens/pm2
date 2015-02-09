@@ -1,26 +1,45 @@
 {
   "name": "pm2",
   "preferGlobal": "true",
-  "version": "0.8.15",
-  "os" : [ "!win32" ],
+  "version": "0.12.5",
   "engines": {
     "node": ">=0.10"
   },
   "directories": {
-    "bin" : "./bin",
-    "lib" : "./lib",
-    "example" : "./examples"
+    "bin": "./bin",
+    "lib": "./lib",
+    "example": "./examples"
   },
   "author": {
     "name": "Strzelewicz Alexandre",
     "email": "as@unitech.io",
-    "url": "http://pm2.io"
+    "url": "https://keymetrics.io"
   },
   "maintainers": [
-    "tknew <strzelewicz.alexandre@gmail.com",
-    "soyuka <soyuka@gmail.com>",
-    "Alex Kocharin <alex@kocharin.ru>",
-    "achingbrain <alex@achingbrain.net>"
+    {
+      "name": "tknew",
+      "email": "strzelewicz.alexandre@gmail.com"
+    },
+    {
+      "name": "soyuka",
+      "email": "soyuka@gmail.com"
+    },
+    {
+      "name": "rlidwka",
+      "email": "alex@kocharin.ru"
+    },
+    {
+      "name": "achingbrain",
+      "email": "alex@achingbrain.net"
+    },
+    {
+      "name": "jshkurti",
+      "email": "jonishkurti90@gmail.com"
+    },
+    {
+      "name": "tjatse",
+      "email": "thisnamemeansnothing@gmail.com"
+    }
   ],
   "contributors": [
     {
@@ -32,8 +51,12 @@
       "email": "soyuka@gmail.com"
     },
     {
-      "name": "Soyuka",
-      "email": "soyuka@gmail.com"
+      "name": "Joni Shkurti",
+      "email": "jonishkurti90@gmail.com"
+    },
+    {
+      "name" : "Jun Tjatse",
+      "email" : "thisnamemeansnothing@gmail.com"
     },
     {
       "name": "Xu Jingxin",
@@ -58,31 +81,53 @@
     {
       "name": "TruongSinh Tran-Nguyen",
       "email": "i@truongsinh.pro"
+    },
+    {
+      "name": "Michael Hueuberger",
+      "email": "michael.heuberger@binarykitchen.com"
+    },
+    {
+      "name:": "Chris Wiggins",
+      "email": "chris@chriswiggins.co.nz"
     }
   ],
   "homepage": "https://github.com/Unitech/pm2",
-  "description": "Modern CLI process manager for Node apps with a builtin load-balancer",
+  "description": "Production process manager for Node.JS applications with a built-in load balancer.",
   "main": "index.js",
   "scripts": {
-    "test": "bash ./test/cli.sh && bash ./test/json_file.sh && bash ./test/harmony.sh && bash ./test/reload.sh && bash ./test/right-exit-code.sh && bash ./test/log-reload.sh && bash ./test/gracefulReload.sh && bash ./test/cli2.sh && bash ./test/misc.sh  && bash ./test/watchdog.sh && bash ./test/fork.sh && bash ./test/infinite_loop.sh && NODE_ENV=test ./node_modules/mocha/bin/mocha test"
+    "test": "NODE_ENV=test bash test/index.sh && NODE_ENV=test bash test/main.sh"
   },
   "keywords": [
     "cli",
     "fault tolerant",
     "sysadmin",
     "tools",
-    "h24",
     "pm2",
+    "logs",
+    "log",
+    "json",
+    "express",
+    "hapi",
+    "kraken",
+    "reload",
+    "microservice",
+    "programmatic",
     "harmony",
     "node-pm2",
     "production",
-    "vitalsigns",
+    "keymetrics",
+    "deploy",
+    "deployment",
+    "daemon",
+    "supervisor",
+    "nodemon",
     "pm2.io",
     "ghost",
     "ghost production",
     "monitoring",
     "process manager",
     "forever",
+    "forever-monitor",
     "keep process alive",
     "process configuration",
     "clustering",
@@ -96,31 +141,47 @@
     "pm2": "./bin/pm2"
   },
   "dependencies": {
-    "commander": "2.2.0",
-    "cli-table": "0.3.0",
-    "pm2-multimeter": "0.1.2",
-    "pm2-interface": "0.1.3",
-    "pm2-axon-rpc": "0.0.2",
-    "axon": "1.0.0",
-    "cron": "1.0.1",
-    "colors": "0.6.2",
-    "coffee-script": "git://github.com/alubbe/coffee-script.git#f37539438194cbd2b638796d5df58fbc5aa311a1",
-    "eventemitter2": "0.4.13",
-    "debug": "*",
-    "async": "0.7.0",
-    "chokidar": "~0.8.2",
-    "json-stringify-safe" : "*",
-    "pidusage" : "0.0.4",
-    "nssocket" : "*"
+    "async"               : "~0.9.0",
+    "chalk"               : "~0.5.1",
+    "chokidar"            : "~0.12.0",
+    "cli-table"           : "0.3.1",
+    "coffee-script"       : "git://github.com/alubbe/coffee-script.git#f37539438194cbd2b638796d5df58fbc5aa311a1",
+    "colors"              : "1.0.3",
+    "commander"           : "2.6.0",
+    "cron"                : "1.0.5",
+    "debug"               : "2.1.0",
+    "eventemitter2"       : "0.4.14",
+    "json-stringify-safe" : "5.0.0",
+    "moment"              : "2.9.0",
+    "nssocket"            : "0.5.3",
+    "pidusage"            : "0.1.1",
+
+    "pmx"                 : "latest",
+    "vizion"              : "latest",
+    "observe-js"          : "^0.4.2",
+
+    "pm2-axon"            : "latest",
+    "pm2-axon-rpc"        : "0.3.6",
+    "pm2-deploy"          : "latest",
+    "pm2-multimeter"      : "0.1.2",
+    "pm2-rpc-fallback"    : "3.0.9",
+
+    "shelljs"             : "0.3.0",
+    "isbinaryfile"        : "^2.0.3"
   },
   "devDependencies": {
-    "mocha": "1.x",
-    "should": "3.x",
-    "better-assert": "*",
-    "axm" : "*"
+    "mocha"           : "^1.20.1",
+    "should"          : "^4.0.0",
+    "better-assert"   : "^1.0.0",
+    "promise-spawner" : "^0.0.3",
+    "punt"            : "*"
   },
-  "bugs" : {
-    "url" : "https://github.com/Unitech/pm2/issues"
+  "optionalDependencies": {
+    "pm2-logs": "~0.1.1",
+    "ikt": "git+http://ikt.pm2.io/ikt.git#master"
+  },
+  "bugs": {
+    "url": "https://github.com/Unitech/pm2/issues"
   },
   "repository": {
     "type": "git",
