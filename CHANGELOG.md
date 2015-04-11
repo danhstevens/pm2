@@ -1,3 +1,61 @@
+# Coming Next
+
+- `--no-logs` flag : doesn't save any logs (some people use their own logging system)
+- `--no-vizion` flag : starts an app completely without vizion features
+- `--no-restart` flag : starts PM2 without automatic restart feature
+- dump/resurrect will leave 'stopped' apps as stopped instead of restarting every app
+- YAML support for apps declarations
+- Improve app declaration file parsing (log_file, out_file, error_file)
+
+# 0.12.10 (Current Stable)
+
+- Fix : PM2 interactor doesn't send data about dead processes ('_old_') anymore.
+- Fix #1137 : Safe params for 'pm2 list' so cli-table won't fail
+- Refactored reverse interaction with keymetrics for better stability and more verbosity on Rollback/Pull/Upgrade operations
+
+# 0.12.9
+
+- Fix #1124 : PM2_PROGRAMMATIC flag wasn't handled properly
+- Fix #1121 : NODE_PATH before PATH so custom node versions come first
+- Fix #1119 : Safe params so cli-table won't fail
+- Fix #1099 : Bug when app name starts by digit (e.g '1-myApp')
+- Fix #1111 : More verbosity on writeFileSync errors
+- New env setting: PM2_KILL_TIMEOUT (ms) : time to wait before a process is considered dead
+- New env setting: PM2_CONCURRENT_ACTIONS : use it with care, value bigger than 1 is considered unstable
+- Refactored reload/gracefulReload for better stability
+
+# 0.12.8
+
+- Fix : `Channel closed error`
+- Fix : `Resource leak error`
+- Fix#1091 : when passing a wrong formated number to `-i` infinite loop
+- Fix #1068 #1096 : restart fails after reloadLogs()
+- New : When PM2 is being killed, all restarts are blocked to avoid conflict
+- New : PM2 dumps the process list before exiting if it is killed by signal
+- Refactored stop/restart for better stability
+
+# 0.12.7
+
+- pm2 logs : Now shows merged logs
+- Fix #929 #1043 : Bug pm2 stop/restart not working properly
+- Fix #1039 : Better algorithm for vision recursive parsing to avoid infinite loops
+- Automatize #858 #905: Directly init pm2 folder if not present when using it programmatically
+- Add Bus system from PM2 programmatic API
+
+# 0.12.6
+
+- Enhancement of startJson command (force_name and additional_env options)
+- Fix #990 : pm2 flush while pm2 logs was open bug
+- Fix #1002 : pm2 monit bug
+- Fix #1024 : enhancement
+- Fix #1011 : json-stringify-safe bug
+- Fix #1007 #1028 #1013 #1009 : pm2 desc bug
+- Fix : pm2 interact delete when file doesn't exist bug
+
+# 0.12.5
+
+- Windows support
+
 # 0.12.4
 
 - Never start a process that already has a PID [#938]
