@@ -24,9 +24,9 @@ export PATH=%NODE_PATH%:$PATH
 export PM2_HOME="%HOME_PATH%"
 
 get_user_shell() {
-    local shell=$(getent passwd ${1:-`whoami`} | cut -d: -f7)
+    local shell=$(getent passwd ${1:-`whoami`} | cut -d: -f7 | sed -e 's/[[:space:]]*$//')
 
-    if [[ $shell == *"/sbin/nologin" ]] || [[ $shell == "/bin/false" ]];
+    if [[ $shell == *"/sbin/nologin" ]] || [[ $shell == "/bin/false" ]] || [[ -z "$shell" ]];
     then
       shell="/bin/bash"
     fi
@@ -36,7 +36,7 @@ get_user_shell() {
 
 super() {
     local shell=$(get_user_shell $USER)
-    su - $USER -s $shell -c "PATH=$PATH; $*"
+    su - $USER -s $shell -c "PATH=$PATH; PM2_HOME=$PM2_HOME $*"
 }
 
 start() {
