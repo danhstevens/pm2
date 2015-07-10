@@ -5,12 +5,14 @@
 ### Quick start
 
 - [Installation](#a1)
+- [Folder structure](#pm2-folder-structure)
 - [Usage](#a2)
 - [Examples](#a3)
 - [Different ways to launch a process](#raw-examples)
 - [Options](#a987)
   - [Schema](#schema)
 - [How to update PM2?](#update-pm2)
+- [PM2 tab-completion](#tab-completion)
 - [Allow PM2 to bind apps on port 80/443 without root](#authbind-pm2)
 
 ### Features
@@ -21,10 +23,11 @@
 - [Monitoring CPU/Memory usage](#a7)
 - [Logs management](#a9)
 - [Clustering](#a5)
+- [Multiple PM2 on the same server](#multiple-pm2)
 - [Watch & Restart](#watch--restart)
 - [Reloading without downtime](#hot-reload--0s-reload)
 - [Make PM2 restart on server reboot](#a8)
-- [JSON app declaration](#json-app-declaration)
+- [JS/JSON app declaration](#json-app-declaration)
   - [Options list](#list-of-all-json-declaration-fields-avaibles)
   - [Schema](#schema)
 
@@ -86,6 +89,19 @@ If the above fails use:
 ```bash
 $ npm install git://github.com/Unitech/pm2#master -g
 ```
+
+<a name="pm2-folder-structure"/>
+## PM2 configuration folder structure
+
+Once PM2 is started, it automatically create these folders:
+- `$HOME/.pm2` will contain all PM2 related files
+- `$HOME/.pm2/logs` will contain all applications logs
+- `$HOME/.pm2/pids` will contain all applications pids
+- `$HOME/.pm2/pm2.log` PM2 logs
+- `$HOME/.pm2/pm2.pid` PM2 pid
+- `$HOME/.pm2/rpc.sock` Socket file for remote commands
+- `$HOME/.pm2/pub.sock` Socket file for publishable events
+- `$HOME/.pm2/conf.js` PM2 Configuration
 
 <a name="a2"/>
 ## Usage
@@ -250,6 +266,34 @@ Then update the in-memory PM2 :
 $ pm2 update
 ```
 
+<a name="tab-completion"/>
+## PM2 tab-completion
+
+Tab-completion for pm2.
+
+Append pm2 completion script to your .bashrc or .zshrc file:
+
+```bash
+$ pm2 completion install
+```
+Or manually append completion script to your ~/.bashrc or ~/.zshrc file:
+
+```bash
+$ pm2 completion >> ~/.bashrc # or ~/.zshrc
+```
+
+Then source your .bashrc or .zshrc file for current session:
+
+```bash
+$ source ~/.bashrc # or ~/.zshrc
+```
+
+You can add pm2 completion to your current session this way:
+
+```bash
+$ . <(pm2 completion)
+```
+
 <a name="authbind-pm2"/>
 ## Allow PM2 to bind applications on ports 80/443 without root
 
@@ -364,7 +408,7 @@ $ pm2 start app.js -i 3
 
 ### Considerations
 
-- You don't need to modify anything from you code to be able to use this nifty feature.
+- You don't need to modify anything from your code to be able to use this nifty feature.
 - In your application the environment variable `NODE_APP_INSTANCE` is exposed so you can listen for different port if needed. (e.g .listen(8000 + process.env.NODE_APP_INSTANCE))
 - Be sure your **application is stateless** meaning that there is not any local data stored in the process, like sessions/websocket connections etc. Use Redis, Mongo or other DB to share states between processes
 
@@ -516,7 +560,7 @@ $ pm2 start big-array.js --max-memory-restart 20M
 ### Programmatic
 
 ```
-pm2.start({{
+pm2.start({
   name               : "max_mem",
   script             : "big-array.js",
   max_memory_restart : "20M"
@@ -583,17 +627,39 @@ Just use the `-u <username>` option !
 $ pm2 startup ubuntu -u www
 ```
 
+<a name="multiple-pm2"/>
 ### Related commands
 
 Dump all processes status and environment managed by PM2:
+
 ```bash
-$ pm2 dump
+$ pm2 [dump|save]
 ```
+
 It populates the file `~/.pm2/dump.pm2` by default.
 
 To bring back the latest dump:
+
 ```bash
-$ pm2 [resurrect|save]
+$ pm2 resurrect
+```
+
+## Multiple PM2 on the same server
+
+The client and daemon communicates via socket files available in $HOME/.pm2/[pub.sock|rpc.sock]
+
+You can start multiple PM2 instances by changing the `PM2_HOME` environmnent variable.
+
+```bash
+$ PM2_HOME='.pm2' pm2 start echo.js --name="echo-node-1"
+$ PM2_HOME='.pm3' pm2 start echo.js --name="echo-node-2"
+```
+
+This will start two different PM2 instances. To list processes managed by each different instances do:
+
+```bash
+$ PM2_HOME='.pm2' pm2 list
+$ PM2_HOME='.pm3' pm2 list
 ```
 
 ## Watch & Restart
@@ -610,7 +676,7 @@ If `--watch` is enabled, stopping it won't stop watching:
 
 Restart toggle the `watch` parameter when triggered.
 
-To watch specific paths, please use a JSON app declaration, `watch` can take a string or an array of paths. Default is `true`:
+To watch specific paths, please use a JS/JSON app declaration, `watch` can take a string or an array of paths. Default is `true`:
 
 ```json
 {
@@ -636,14 +702,13 @@ var watch_options = {
 }
 ```
 
-## JSON app declaration
+## JS/JSON app declaration
 
-
-PM2 empowers your process management workflow, by allowing you to fine-tune the behavior, options, environment variables, logs files... of each process you need to manage via JSON configuration.
+PM2 empowers your process management workflow, by allowing you to fine-tune the behavior, options, environment variables, logs files... of each process you need to manage via JSON/JSON5/JS configuration.
 
 It's particularly usefull for micro service based applications.
 
-You can define parameters for your apps in a JSON file:
+You can define parameters for your apps in a JS/JSON file:
 
 ```json
 {
@@ -675,16 +740,24 @@ Then you can run:
 
 ```bash
 # Start all apps
-$ pm2 start processes.json
+$ pm2 start processes.js[on]
 
 # Stop
-$ pm2 stop processes.json
+$ pm2 stop processes.js[on]
+
+# Restart
+$ pm2 start processes.js[on]
+## Or
+$ pm2 restart processes.js[on]
+
+# Reload
+$ pm2 reload processes.js[on]
+
+# Graceful Reload
+$ pm2 gracefulReload processes.js[on]
 
 # Delete from PM2
-$ pm2 delete processes.json
-
-# Restart all
-$ pm2 restart processes.json
+$ pm2 delete processes.js[on]
 ```
 
 ### Options

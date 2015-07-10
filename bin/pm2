@@ -16,6 +16,7 @@ var CLI       = require('../lib/CLI');
 var cst       = require('../constants.js');
 var pkg       = require('../package.json');
 var platform  = require('os').platform();
+var tabtab    = require('../lib/completion.js');
 
 CLI.pm2Init();
 
@@ -47,6 +48,7 @@ commander.version(pkg.version)
   .option('--no-color', 'skip colors')
   .option('--no-vizion', 'start an app without vizion feature (versioning control)')
   .option('--no-autorestart', 'start an app without automatic restart')
+  .option('--no-treekill', 'Only kill main process not detached childrens')
 
   .usage('[cmd] app');
 
@@ -72,7 +74,7 @@ commander.on('--help', function() {
   console.log('    $ pm2 kill');
   console.log('');
   console.log('    Update pm2 :');
-  console.log('    $ npm install pm2@latest -g ; pm2 updatePM2');
+  console.log('    $ npm install pm2@latest -g ; pm2 update');
   console.log('');
   console.log('    More examples in https://github.com/Unitech/pm2#usagefeatures');
   console.log('');
@@ -110,9 +112,35 @@ function beginCommandProcessing() {
       console.log('Local PM2 version:', chalk.blue.bold(pkg.version));
       console.log('');
     }
-    commander.parse(process.argv);
   });
+  commander.parse(process.argv);
 }
+
+function checkCompletion(){
+  return tabtab.complete('pm2', function(err, data) {
+    if(err || !data) return;
+    if(/^--\w?/.test(data.last)) return tabtab.log(commander.options.map(function (data) {
+      return data.long;
+    }), data);
+    if(/^-\w?/.test(data.last)) return tabtab.log(commander.options.map(function (data) {
+      return data.short;
+    }), data);
+    // array containing commands after which process name should be listed
+    var cmdProcess = ['stop', 'restart', 'scale', 'reload', 'gracefulReload', 'delete', 'reset', 'pull', 'forward', 'backward', 'logs', 'describe', 'desc', 'show'];
+    if(cmdProcess.indexOf(data.prev) > -1) {
+      CLI.connect(function() {
+        CLI.list(function(err, list){
+          tabtab.log(list.map(function(el){ return el.name}), data);
+            CLI.disconnect();
+          });
+      });
+    }
+    else if (data.prev == 'pm2')
+      tabtab.log(commander.commands.map(function (data) {
+      return data._name;
+    }), data);
+  });
+};
 
 if (process.argv.indexOf('--no-daemon') > -1) {
   //
@@ -131,10 +159,17 @@ if (process.argv.indexOf('--no-daemon') > -1) {
     });
   });
 }
-else
+else {
   Satan.start(false, function() {
-    beginCommandProcessing();
+    if (process.argv.slice(2)[0] === 'completion') {
+      checkCompletion();
+      CLI.disconnect();
+    }
+    else
+      beginCommandProcessing();
   });
+}
+
 
 
 //
@@ -154,7 +189,7 @@ function failOnUnknown(fn) {
 //
 // Start command
 //
-commander.command('start <file|json|stdin>')
+commander.command('start <file|json|stdin|app_name|pm_id>')
   .option('--watch', 'Watch folder for changes')
   .description('start and daemonize an app')
   .action(function(cmd) {
@@ -567,18 +602,35 @@ commander.command('reloadLogs')
 // Log streaming
 //
 commander.command('logs [id|name]')
+  .option('--err', 'only shows error output')
+  .option('--out', 'only shows standard output')
   .option('--raw', 'logs without timestamps and other PM2 indicators')
-  .option('--lines <N>', 'output the last N lines, instead of the last 20')
+  .option('--lines <n>', 'output the last N lines, instead of the last 20 by default')
+  .option('--timestamp [format]', 'add timestamps (default format YYYY-MM-DD-HH:mm:ss)')
   .description('stream logs file. Default stream all logs')
   .action(function(id, cmd) {
     var line = 20;
     var raw  = false;
+    var exclusive = false;
+    var timestamp = false;
+
     if(!isNaN(cmd.lines)){
       line = parseInt(cmd.lines);
     }
+
     if (cmd.parent.rawArgs.indexOf('--raw') !== -1)
       raw = true;
-    CLI.streamLogs(id, line, raw);
+
+    if (cmd.timestamp)
+      timestamp = typeof cmd.timestamp === 'string' ? cmd.timestamp : 'YYYY-MM-DD-HH:mm:ss';
+
+    if (cmd.out === true)
+      exclusive = 'out';
+
+    if (cmd.err === true)
+      exclusive = 'err';
+
+    CLI.streamLogs(id, line, raw, timestamp, exclusive);
   });
 
 
