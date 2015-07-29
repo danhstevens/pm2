@@ -27,7 +27,7 @@
 - [Watch & Restart](#watch--restart)
 - [Reloading without downtime](#hot-reload--0s-reload)
 - [Make PM2 restart on server reboot](#a8)
-- [JS/JSON app declaration](#json-app-declaration)
+- [JS/JSON app declaration](#jsjson-app-declaration)
   - [Options list](#list-of-all-json-declaration-fields-avaibles)
   - [Schema](#schema)
 
@@ -702,6 +702,8 @@ var watch_options = {
 }
 ```
 
+When working with NFS devices you'll need to set `usePolling: true` as stated in [this chokidar issue](https://github.com/paulmillr/chokidar/issues/242).  
+
 ## JS/JSON app declaration
 
 PM2 empowers your process management workflow, by allowing you to fine-tune the behavior, options, environment variables, logs files... of each process you need to manage via JSON/JSON5/JS configuration.
@@ -764,7 +766,7 @@ $ pm2 delete processes.js[on]
 
 The following are valid options for JSON app declarations:
 
-```json
+```js
 {
   "name"             : "node-app",
   "cwd"              : "/srv/node-app/current",
@@ -1419,8 +1421,8 @@ Every data, states, websocket session, session data, must be shared via any kind
 
 We recommend using Redis for sharing session data, websocket.
 
-- SocketIO with Redis : [https://github.com/LearnBoost/Socket.IO/wiki/Configuring-Socket.IO](Configuring SocketIO)
-- Redis session store for Connect : [https://github.com/visionmedia/connect-redis](Connect-redis)
+- [Configuring SocketIO](https://github.com/LearnBoost/Socket.IO/wiki/Configuring-Socket.IO)
+- [Redis session store for Connect](https://github.com/visionmedia/connect-redis)
 
 We recommend following the 12 factor convention : [http://12factor.net/](http://12factor.net/)
 
