@@ -1,3 +1,32 @@
+# 0.14.7
+
+-
+- New flag `--no-pmx` : starts an app without injecting pmx
+- New feature : cron restart now works in fork mode as well
+- Disabled auto-gc on interactor
+- Allow PM2 to execute binaries in $PATH
+- pm2 link priv pub --recyle for elastic infrastructure
+- pm2 deploy now check default file ecosystem.js[on|on5], package.json
+
+# 0.14.6
+
+- Scoped PM2 actions
+- Password encryption via pm2 set pm2:passwd xxxx
+- Interactor Remote action refactor
+- .getSync method to get configuration variable synchronously
+- Add password protected PM2 methods (install, delete)
+- pm2 get|pm2 conf display all confs
+- Password protected PM2 flag
+- New flag : `--restart-delay <ms>` (or `restart_delay` in JSON declaration)
+- New command : `pm2 deepUpdate`
+- New command (beta) : `pm2 logrotate`
+- Enhancement : pm2 handles processes that can't be killed in a better way
+- Fix : some ignore_watch issues
+- Fix : some pm2 startup systemd issues
+
+# 0.14.5
+
+- Hot fix
 
 # 0.14.4
 

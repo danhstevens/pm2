@@ -47,6 +47,8 @@ var csts = {
   DARWIN_STARTUP_SCRIPT  : '../lib/scripts/io.keymetrics.PM2.plist',
   FREEBSD_STARTUP_SCRIPT : '../lib/scripts/pm2-freebsd.sh',
 
+  LOGROTATE_SCRIPT       : '../lib/scripts/logrotate.d/pm2',
+
   SUCCESS_EXIT           : 0,
   ERROR_EXIT             : 1,
 
@@ -77,7 +79,7 @@ var csts = {
 var default_conf = util._extend({
   PM2_ROOT_PATH: PM2_ROOT_PATH,
   WORKER_INTERVAL: process.env.PM2_WORKER_INTERVAL || 30000,
-  KILL_TIMEOUT: process.env.PM2_KILL_TIMEOUT || 800
+  KILL_TIMEOUT: process.env.PM2_KILL_TIMEOUT || 1600
 }, require('./lib/samples/sample-conf.js')(PM2_ROOT_PATH));
 
 /**

@@ -1,4 +1,4 @@
-![PM2](https://github.com/unitech/pm2/raw/master/pres/pm2.20d3ef.png)
+[![PM2](https://github.com/unitech/pm2/raw/master/pres/pm2.20d3ef.png)](http://pm2.keymetrics.io)
 
 **P**(rocess) **M**(anager) **2**
 
@@ -10,7 +10,9 @@ Starting an application in production mode is as easy as:
 $ pm2 start app.js
 ```
 
-PM2 is constantly assailed by [more than 400 tests](https://travis-ci.org/Unitech/PM2).
+PM2 is constantly assailed by [more than 700 tests](https://travis-ci.org/Unitech/PM2).
+
+Official website: [http://pm2.keymetrics.io](http://pm2.keymetrics.io)
 
 Compatible with [io.js](https://github.com/iojs/io.js) and [Node.js](https://github.com/joyent/node).
 Compatible with CoffeeScript.
@@ -34,24 +36,25 @@ $ npm install pm2 -g
 $ pm2 start app.js
 ```
 
-Your app is now put in background, kept alive forever and monitored.
+Your app is now put in background, monitored and kept alive forever.
 
-Or you can use pm2 programmatically:
+[More about Process Management](http://pm2.keymetrics.io/docs/usage/quick-start/#cheat-sheet)
 
-```javascript
-var pm2 = require('pm2');
+## Module system
 
-pm2.connect(function() {
-  pm2.start({
-    script    : 'app.js',         // Script to be run
-    exec_mode : 'cluster',        // Allow your app to be clustered
-    instances : 4,                // Optional: Scale your app by 4
-    max_memory_restart : '100M'   // Optional: Restart your app if it reaches 100Mo
-  }, function(err, apps) {
-    pm2.disconnect();
-  });
-});
+PM2 embeds a simple and powerful module system. Installing a module is straightforward:
+
+```bash
+$ pm2 install <module_name>
 ```
+
+Here are some PM2 compatible modules (standalone Node.js applications managed by PM2):
+
+[**pm2-logrotate**](https://github.com/pm2-hive/pm2-logrotate) auto rotate logs of PM2 and applications managed<br/>
+[**pm2-webshell**](https://github.com/pm2-hive/pm2-webshell) expose a fully capable terminal in browsers<br/>
+[**pm2-autopull**](https://github.com/pm2-hive/pm2-auto-pull) auto pull all applications managed by PM2<br/>
+
+[How to write a module](http://pm2.keymetrics.io/docs/advanced/pm2-module-system/)
 
 ## Update PM2
 
@@ -92,6 +95,31 @@ To have more details on a specific process:
 $ pm2 describe <id|app_name>
 ```
 
+[More about Process Management](http://pm2.keymetrics.io/docs/usage/quick-start/#cheat-sheet)
+
+### Load balancing / 0s reload downtime
+
+When an app is started with the -i <worker number> option, the **cluster** mode is enabled.
+
+Supported by all major Node.js frameworks and any Node.js / io.js applications
+
+![Framework supported](https://raw.githubusercontent.com/Unitech/PM2/development/pres/cluster-support.png)
+
+**Warning**: If you want to use the embedded load balancer (cluster mode), we recommend the use of `node#0.12.0+`, `node#0.11.16+` or `io.js#1.0.2+`. We do not support `node#0.10.*`'s cluster module anymore.
+
+With the cluster mode, PM2 enables load balancing between multiple application to use all CPUs available in a server.
+Each HTTP/TCP/UDP request will be forwarded to one specific process at a time.
+
+```bash
+$ pm2 start app.js -i 0  # Enable load-balancer and cluster features
+
+$ pm2 reload all           # Reload all apps in 0s manner
+
+$ pm2 scale <app_name> <instance_number> # Increase / Decrease process number
+```
+
+[More informations about how PM2 make clustering easy](https://keymetrics.io/2015/03/26/pm2-clustering-made-easy/)
+
 ### CPU / Memory Monitoring
 
 ![Monit](https://github.com/unitech/pm2/raw/master/pres/pm2-monit.png)
@@ -125,28 +153,7 @@ $ pm2 logs PM2 --timestamp
 $ pm2 flush          # Clear all the logs
 ```
 
-### Load balancing / 0s reload downtime
-
-When an app is started with the -i <worker number> option, the **cluster** mode is enabled.
-
-Supported by all major Node.js frameworks and any Node.js / io.js applications
-
-![Framework supported](https://raw.githubusercontent.com/Unitech/PM2/development/pres/cluster-support.png)
-
-**Warning**: If you want to use the embedded load balancer (cluster mode), we recommend the use of `node#0.12.0+`, `node#0.11.16+` or `io.js#1.0.2+`. We do not support `node#0.10.*`'s cluster module anymore.
-
-With the cluster mode, PM2 enables load balancing between multiple application to use all CPUs available in a server.
-Each HTTP/TCP/UDP request will be forwarded to one specific process at a time.
-
-```bash
-$ pm2 start app.js -i 0  # Enable load-balancer and cluster features
-
-$ pm2 reload all           # Reload all apps in 0s manner
-
-$ pm2 scale <app_name> <instance_number> # Increase / Decrease process number
-```
-
-[More informations about how PM2 make clustering easy](https://keymetrics.io/2015/03/26/pm2-clustering-made-easy/)
+[More about log management](http://pm2.keymetrics.io/docs/usage/log-management/)
 
 ### Startup script generation
 
@@ -166,6 +173,8 @@ To save a process list just do:
 $ pm2 save
 ```
 
+[More about startup scripts](http://pm2.keymetrics.io/docs/usage/startup/)
+
 ### Development mode
 
 PM2 comes with a development tool that allow you to start an application and restart it on file change.
@@ -174,22 +183,6 @@ PM2 comes with a development tool that allow you to start an application and res
 # Start your application in development mode
 # = Print the logs and restart on file change
 $ pm2-dev run my-app.js
-```
-
-### Run Next generation Javascript
-
-PM2 embeds [BabelJS](https://babeljs.io/) to use [next generation Javascript](http://es6-features.org/) both in development and production.
-
-All features are supported, like watch and restart, cluster mode, reload and related.
-
-To run an ES6/ES7 applications:
-
-```bash
-# Enable ES6/ES7 live compilation
-$ pm2 start app.js --next-gen-js
-
-# Or use the .es extension to automatically enable it
-$ pm2 start app.es
 ```
 
 ## Keymetrics monitoring
@@ -203,27 +196,22 @@ Feel free to try it:
 
 Thanks in advance and we hope that you like PM2!
 
-## More PM2 features
+## More about PM2
 
-- [Watch & Restart](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#watch--restart)
-- [JSON application declaration](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#json-app-declaration)
-- [Using PM2 in your code](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#programmatic-example)
-- [Deployment workflow](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#deployment)
-- [Startup script generation (SystemD/Ubuntu/Gentoo/AWS)](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#startup-script)
-- [Advanced log management (flush, reload, logs)](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#a9)
-- [GracefullReload](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#a690)
+- [Watch & Restart](http://pm2.keymetrics.io/docs/usage/watch-and-restart/)
+- [Application Declaration via JS files](http://pm2.keymetrics.io/docs/usage/application-declaration/)
+- [PM2 API](http://pm2.keymetrics.io/docs/usage/pm2-api/)
+- [Deploying workflow](http://pm2.keymetrics.io/docs/usage/deployment/)
+- [PM2 and Heroku/Azure/App Engine](http://pm2.keymetrics.io/docs/usage/use-pm2-with-cloud-providers/)
+- [PM2 auto completion](http://pm2.keymetrics.io/docs/usage/auto-completion/)
 
-## PM2 Full documentation
-
-[Advanced README.md](https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md)
-
-## Changelog
+## CHANGELOG
 
 [CHANGELOG](https://github.com/Unitech/PM2/blob/master/CHANGELOG.md)
 
 ## Contributors
 
-[Contributors](https://github.com/Unitech/PM2/graphs/contributors)
+[Contributors](http://pm2.keymetrics.io/all-of-fame/)
 
 ## License
 

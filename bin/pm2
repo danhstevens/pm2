@@ -33,6 +33,7 @@ commander.version(pkg.version)
   .option('-e --error <path>', 'specify error log file')
   .option('-p --pid <pid>', 'specify pid file')
   .option('--max-memory-restart <memory>', 'specify max memory amount used to autorestart (in megaoctets)')
+  .option('--restart-delay <delay>', 'specify a delay between restarts (in milliseconds)')
   .option('--env <environment_name>', 'specify environment to get specific env variables (for JSON declaration)')
   .option('-x --execute-command', 'execute a program using fork system')
   .option('-u --user <username>', 'define user when generating startup script')
@@ -48,7 +49,8 @@ commander.version(pkg.version)
   .option('--no-color', 'skip colors')
   .option('--no-vizion', 'start an app without vizion feature (versioning control)')
   .option('--no-autorestart', 'start an app without automatic restart')
-  .option('--no-treekill', 'Only kill main process not detached childrens')
+  .option('--no-treekill', 'Only kill the main process, not detached children')
+  .option('--no-pmx', 'start an app without pmx')
 
   .usage('[cmd] app');
 
@@ -131,14 +133,14 @@ function checkCompletion(){
       CLI.connect(function() {
         CLI.list(function(err, list){
           tabtab.log(list.map(function(el){ return el.name}), data);
-            CLI.disconnect();
-          });
+          CLI.disconnect();
+        });
       });
     }
     else if (data.prev == 'pm2')
       tabtab.log(commander.commands.map(function (data) {
-      return data._name;
-    }), data);
+        return data._name;
+      }), data);
   });
 };
 
@@ -361,7 +363,7 @@ commander.command('set <key> <value>')
     CLI.set(key, value);
   });
 
-commander.command('get <key>')
+commander.command('get [key]')
   .description('get value for <key>')
   .action(function(key) {
     CLI.get(key);
@@ -388,46 +390,50 @@ commander.command('unset <key>')
 //
 // Interact
 //
-function interact(secret_key, public_key, machine) {
+function interact(secret_key, public_key, machine, opts) {
+  var recycle = opts.recycle || false;
+
   if (secret_key == 'stop' || secret_key == 'kill') {
     console.log(chalk.cyan('[Keymetrics.io]') + ' Stopping agent...');
     CLI.killInteract(function() {
       console.log(chalk.cyan('[Keymetrics.io]') + ' Stopped');
       return process.exit(cst.SUCCESS_EXIT);
-      });
-      return false;
-    }
-    if (secret_key == 'info') {
-      console.log(chalk.cyan('[Keymetrics.io]') + ' Getting agent information...');
-      return CLI.infoInteract();
-    }
-    if (secret_key == 'delete') {
-      CLI.killInteract(function() {
-        try {
-          fs.unlinkSync(cst.INTERACTION_CONF);
-        } catch(e) {
-          console.log(chalk.cyan('[Keymetrics.io]') + ' No interaction config file found');
-          return process.exit(cst.SUCCESS_EXIT);
-        }
-        console.log(chalk.cyan('[Keymetrics.io]') + ' Agent interaction ended');
+    });
+    return false;
+  }
+  if (secret_key == 'info') {
+    console.log(chalk.cyan('[Keymetrics.io]') + ' Getting agent information...');
+    return CLI.infoInteract();
+  }
+  if (secret_key == 'delete') {
+    CLI.killInteract(function() {
+      try {
+        fs.unlinkSync(cst.INTERACTION_CONF);
+      } catch(e) {
+        console.log(chalk.cyan('[Keymetrics.io]') + ' No interaction config file found');
         return process.exit(cst.SUCCESS_EXIT);
-      });
-      return false;
-    }
-    if (secret_key == 'start' || secret_key == 'restart')
-      return CLI.interact(null, null, null);
-    if (secret_key && !public_key) {
-      console.error(chalk.cyan('[Keymetrics.io]') + ' Command [%s] unknown or missing public key', secret_key);
-      return process.exit(cst.ERROR_EXIT);
-    }
-    return CLI.interact(secret_key, public_key, machine);
+      }
+      console.log(chalk.cyan('[Keymetrics.io]') + ' Agent interaction ended');
+      return process.exit(cst.SUCCESS_EXIT);
+    });
+    return false;
+  }
+  if (secret_key == 'start' || secret_key == 'restart')
+    return CLI.interact(null, null, null);
+  if (secret_key && !public_key) {
+    console.error(chalk.cyan('[Keymetrics.io]') + ' Command [%s] unknown or missing public key', secret_key);
+    return process.exit(cst.ERROR_EXIT);
+  }
+  return CLI.interact(secret_key, public_key, machine, recycle);
 }
 commander.command('interact [secret_key|command] [public_key] [machine_name]')
   .description('linking action to keymetrics.io - command can be stop|info|delete|restart')
+  .option('--recycle', 'for elastic infrastructure')
   .action(interact);
 
 commander.command('link [secret_key|command] [public_key] [machine_name]')
   .description('linking action to keymetrics.io - command can be stop|info|delete|restart')
+  .option('--recycle', 'for elastic infrastructure')
   .action(interact);
 
 //
@@ -476,6 +482,14 @@ commander.command('startup [platform]')
     CLI.startup(_platform || platform, commander);
   });
 
+//
+// Logrotate
+//
+commander.command('logrotate')
+  .description('copy default logrotate configuration')
+  .action(function(cmd) {
+    CLI.logrotate(commander);
+  });
 
 //
 // Sample generate
@@ -570,13 +584,13 @@ commander.command('prettylist')
 commander.command('monit')
   .description('launch termcaps monitoring')
   .action(function() {
-    CLI.monit()
+    CLI.monit();
   });
 
 commander.command('m')
   .description('(alias) launch termcaps monitoring')
   .action(function() {
-    CLI.monit()
+    CLI.monit();
   });
 
 
@@ -696,6 +710,15 @@ commander.command('iprobe [app_name|app_id]')
   .action(function(pm2_id) {
     pm2_id = pm2_id || 'ALL';
     CLI.IProbe(pm2_id);
+  });
+
+//
+// Perform a deep update of PM2
+//
+commander.command('deepUpdate')
+  .description('peforms a deep update of PM2')
+  .action(function() {
+    CLI.deepUpdate();
   });
 
 //
